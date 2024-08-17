@@ -19,8 +19,7 @@ const isInvalidDate = (date: Date): boolean => {
 };
 
 const findAllYearAndDays = (text: string): Date[] => {
-  const normalizedText = zenkakuDigitsToHankaku(text);
-
+  const normalizedText = zenkakuDigitsToHankaku(text).replace(/\s/g, '');
   const dateRegex =
     /(?:(?<year>\d{1,4}[\/年])?\s*(?<date>\d{1,2}(?:[\/-]\d{1,2}|\s?[\/月]\s?\d{1,2}日?)))/g;
   const matches = Array.from(normalizedText.matchAll(dateRegex));

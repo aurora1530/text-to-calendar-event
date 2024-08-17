@@ -16,13 +16,13 @@ const normalizeYear = (year: number): number => {
 
 const isInvalidDate = (date: Date): boolean => {
   return Number.isNaN(date.getTime());
-}
+};
 
 const findAllYearAndDays = (text: string): Date[] => {
   const normalizedText = zenkakuDigitsToHankaku(text);
 
   const dateRegex =
-    /(?:(?<year>\d{1,4}年)?\s*(?<date>\d{1,2}(?:[\/-]\d{1,2}|\s?月\s?\d{1,2}日)))/g
+    /(?:(?<year>\d{1,4}年)?\s*(?<date>\d{1,2}(?:[\/-]\d{1,2}|\s?月\s?\d{1,2}日)))/g;
   const matches = Array.from(normalizedText.matchAll(dateRegex));
 
   const dates = matches.map((match) => {
@@ -74,7 +74,10 @@ export const extractStartAndEndDates = (text: string): EventDates => {
   }
 
   const start = new Date(yearAndDays[0].setHours(times[0].hour, times[0].minute));
-  const endTargetDate = yearAndDays.length > 1 ? yearAndDays[1] : yearAndDays[0];
+  const endTargetDate =
+    yearAndDays.length > 1 && yearAndDays[1].getTime() > yearAndDays[0].getTime()
+      ? yearAndDays[1]
+      : yearAndDays[0];
   const endTargetTime =
     times.length > 1 ? times[1] : { hour: times[0].hour + 1, minute: times[0].minute };
   const end = new Date(endTargetDate.setHours(endTargetTime.hour, endTargetTime.minute));

@@ -1,0 +1,7 @@
+{
+  "name": "text-to-calendar-event",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "aurora1530 <35615953+aurora1530@users.noreply.github.com>",
+  "license": "MIT"
+}

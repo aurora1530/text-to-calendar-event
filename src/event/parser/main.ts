@@ -1,4 +1,4 @@
-import { EventDates, GoogleCalendarEvent, makeGoogleCalendarEventURL } from 'event/event';
+import { EventDates, GoogleCalendarEvent, makeGoogleCalendarEventURL } from '../event';
 import { extractStartAndEndDates } from './dates';
 
 /**

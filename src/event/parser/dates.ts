@@ -1,4 +1,4 @@
-import { EventDates } from 'event/event';
+import { EventDates } from '../event';
 
 const zenkakuDigitsToHankaku = (text: string): string => {
   return text.replace(/[０-９]/g, (s) => {

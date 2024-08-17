@@ -1,0 +1,1 @@
+export const EVENT_ROOT_URL = "https://calendar.google.com/calendar/render?action=TEMPLATE";

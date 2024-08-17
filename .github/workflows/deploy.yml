@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'webpack.config.js'
+      - 'package.json'
+      - 'yarn.lock'
 
 jobs:
   deploy:

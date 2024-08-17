@@ -33,10 +33,14 @@ const dateParamToURLParam = (
     start: new Date(),
   }
 ): string => {
-  const value = eventDates.isAllday
-    ? dateToRFC5545(eventDates.start).replace(/T.*$/, '')
-    : `${dateToRFC5545(eventDates.start)}/${dateToRFC5545(eventDates.end)}`;
-  return paramToURLParam(key, value);
+  if(eventDates.isAllday){
+    const time = dateToRFC5545(eventDates.start).replace(/T.*$/, '');
+    return paramToURLParam(key, `${time}/${time}`);
+  }
+
+  const start = dateToRFC5545(eventDates.start);
+  const end = dateToRFC5545(eventDates.end);
+  return paramToURLParam(key, `${start}/${end}`);
 };
 
 export const makeGoogleCalendarEventURL = (event: GoogleCalendarEvent): string => {

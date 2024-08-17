@@ -36,3 +36,13 @@ jobs:
         git add .
         git commit -m "build: build bundler.js ${TIMESTAMP}"
         git push origin main
+
+    - name: Checkout pages branch
+      uses: actions/checkout@v3
+      with:
+        ref: pages
+
+    - name: Merge main into pages
+      run: |
+        git merge main
+        git push origin pages

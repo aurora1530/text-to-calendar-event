@@ -45,5 +45,5 @@ jobs:
 
     - name: Merge main into pages
       run: |
-        git merge main
+        git merge origin/main
         git push origin pages

@@ -1,6 +1,6 @@
 import { EVENT_ROOT_URL } from './constant';
 
-type EventDates =
+export type EventDates =
   | {
       isAllday: false;
       start: Date;
@@ -11,7 +11,7 @@ type EventDates =
       start: Date;
     };
 
-type GoogleCalendarEvent = {
+export type GoogleCalendarEvent = {
   text: string;
   details: string;
   dates?: EventDates;

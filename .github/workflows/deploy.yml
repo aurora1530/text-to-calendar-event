@@ -45,5 +45,5 @@ jobs:
 
     - name: Merge main into pages
       run: |
-        git merge origin/main
+        git merge origin/main --allow-unrelated-histories
         git push origin pages

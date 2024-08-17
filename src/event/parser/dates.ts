@@ -14,6 +14,10 @@ const normalizeYear = (year: number): number => {
   return year;
 };
 
+const isInvalidDate = (date: Date): boolean => {
+  return Number.isNaN(date.getTime());
+}
+
 const findAllYearAndDays = (text: string): Date[] => {
   const normalizedText = zenkakuDigitsToHankaku(text);
 
@@ -29,7 +33,7 @@ const findAllYearAndDays = (text: string): Date[] => {
     return new Date(`${year}-${date}`);
   });
 
-  return dates;
+  return dates.filter((date) => !isInvalidDate(date));
 };
 
 type Time = {

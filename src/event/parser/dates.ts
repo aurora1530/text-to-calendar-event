@@ -22,14 +22,14 @@ const findAllYearAndDays = (text: string): Date[] => {
   const normalizedText = zenkakuDigitsToHankaku(text);
 
   const dateRegex =
-    /(?:(?<year>\d{1,4}年)?\s*(?<date>\d{1,2}(?:[\/-]\d{1,2}|\s?月\s?\d{1,2}日)))/g;
+    /(?:(?<year>\d{1,4}[\/年])?\s*(?<date>\d{1,2}(?:[\/-]\d{1,2}|\s?[\/月]\s?\d{1,2}日?)))/g;
   const matches = Array.from(normalizedText.matchAll(dateRegex));
 
   const dates = matches.map((match) => {
     const year = match.groups?.year
-      ? normalizeYear(parseInt(match.groups.year.replace(/年/g, '')))
+      ? normalizeYear(parseInt(match.groups.year.replace(/[\/年]/g, '')))
       : new Date().getFullYear();
-    const date = match.groups?.date.replace(/\s|月|日/g, '/').replace(/年/g, '-');
+    const date = match.groups?.date.replace(/\s|月|日/g, '/').replace(/[\/年]/g, '-');
     return new Date(`${year}-${date}`);
   });
 

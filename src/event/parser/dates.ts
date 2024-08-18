@@ -75,6 +75,10 @@ const addTime = (x: Time, y: Time): Time => {
   };
 };
 
+const setTimeToDate = (date: Date, time: Time): Date => {
+  return new Date(date.setHours(time.hour, time.minute));
+};
+
 export const extractStartAndEndDates = (text: string): EventDates => {
   const yearAndDays = findAllYearAndDays(text);
   const times = findAllTimes(text);
@@ -93,18 +97,25 @@ export const extractStartAndEndDates = (text: string): EventDates => {
     };
   }
 
-  const start = new Date(yearAndDays[0].setHours(times[0].hour, times[0].minute));
+  // startの日付に時刻を設定
+  const start = setTimeToDate(yearAndDays[0], times[0]);
+
+  // endの日付を指定。時刻が複数ある場合は２つ目を、ない場合は１つ目（startと同じ）を使う。
+  // ただし、２つ目の日付が１つ目より前の場合は１つ目を使う。
   const endTargetDate =
     yearAndDays.length > 1 && yearAndDays[1].getTime() > yearAndDays[0].getTime()
       ? yearAndDays[1]
       : yearAndDays[0];
+
+  // 所要時間が指定されている場合は、startの時刻に所要時間を加算してendの時刻を設定
+  // 指定されていない場合は、２つ目の時刻またはstartの時刻に１時間を加算してendの時刻を設定
   const timeRange = findTimeRange(text);
   const endTargetTime = timeRange
     ? addTime(times[0], timeRange)
     : times.length > 1
     ? times[1]
     : addTime(times[0], { hour: 1, minute: 0 });
-  const end = new Date(endTargetDate.setHours(endTargetTime.hour, endTargetTime.minute));
+  const end = setTimeToDate(endTargetDate, endTargetTime);
 
   return {
     isAllday: false,

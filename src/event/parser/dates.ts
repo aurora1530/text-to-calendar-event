@@ -54,6 +54,27 @@ const findAllTimes = (text: string): Time[] => {
   return times;
 };
 
+const findTimeRange = (text: string): Time | undefined => {
+  const timeRegex = /(?<hour>\d{1,2})時間(?<minute>(半|\d{1,2}分))?/;
+  const match = text.match(timeRegex);
+
+  if (!match || !match.groups?.hour) {
+    return;
+  }
+
+  const hour = parseInt(match.groups.hour);
+  const minute =
+    match.groups?.minute === '半' ? 30 : parseInt(match.groups?.minute ?? '0');
+  return { hour, minute };
+};
+
+const addTime = (x: Time, y: Time): Time => {
+  return {
+    hour: x.hour + y.hour,
+    minute: x.minute + y.minute,
+  };
+};
+
 export const extractStartAndEndDates = (text: string): EventDates => {
   const yearAndDays = findAllYearAndDays(text);
   const times = findAllTimes(text);
@@ -77,8 +98,12 @@ export const extractStartAndEndDates = (text: string): EventDates => {
     yearAndDays.length > 1 && yearAndDays[1].getTime() > yearAndDays[0].getTime()
       ? yearAndDays[1]
       : yearAndDays[0];
-  const endTargetTime =
-    times.length > 1 ? times[1] : { hour: times[0].hour + 1, minute: times[0].minute };
+  const timeRange = findTimeRange(text);
+  const endTargetTime = timeRange
+    ? addTime(times[0], timeRange)
+    : times.length > 1
+    ? times[1]
+    : addTime(times[0], { hour: 1, minute: 0 });
   const end = new Date(endTargetDate.setHours(endTargetTime.hour, endTargetTime.minute));
 
   return {

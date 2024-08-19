@@ -52,3 +52,19 @@ button:hover {
 .resulta:hover {
   text-decoration: underline;
 }
+
+.event-preview {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.event-preview p {
+  margin: 5px 0;
+}
+
+.event-preview strong {
+  color: #333;
+}

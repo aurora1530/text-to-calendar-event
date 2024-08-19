@@ -41,7 +41,7 @@ type Time = {
 };
 
 const findAllTimes = (text: string): Time[] => {
-  const timeRegex = /(?<hour>\d{1,2})[:時](?<minute>\d{2})?(?!間)/g;
+  const timeRegex = /(?<hour>\d{1,2})[:：時](?<minute>\d{2})?(?!間)/g;
   const matches = Array.from(text.matchAll(timeRegex));
 
   const times = matches.map((match) => {

@@ -1,3 +1,4 @@
+import { getClipboardHTML } from './lib/clipboard';
 import { GoogleCalendarEvent, makeGoogleCalendarEventURL } from './event/event';
 import { makeGoogleCalendarEventParams } from './event/parser/main';
 
@@ -17,11 +18,22 @@ const setPreview = (eventParams: GoogleCalendarEvent) => {
 };
 
 let eventParams = makeGoogleCalendarEventParams('');
+let clipboardHtml: string | undefined;
+
+document?.getElementById('eventDetails')?.addEventListener('paste', async () => {
+  const useHtml =
+    (document.getElementById('useHtml') as HTMLInputElement)?.checked ?? false;
+  clipboardHtml = useHtml ? await getClipboardHTML() : undefined;
+});
 
 document?.getElementById('eventDetails')?.addEventListener('input', () => {
-  const eventDetails = (document.getElementById('eventDetails') as HTMLTextAreaElement)
+  const inputText = (document.getElementById('eventDetails') as HTMLTextAreaElement)
     ?.value;
-  eventParams = makeGoogleCalendarEventParams(eventDetails);
+
+  const text = clipboardHtml
+    ? inputText.split('\n')[0] + '\n' + clipboardHtml
+    : inputText;
+  eventParams = makeGoogleCalendarEventParams(text);
   setPreview(eventParams);
 });
 

@@ -18,14 +18,14 @@ const setPreview = (eventParams: GoogleCalendarEvent) => {
 
 let eventParams = makeGoogleCalendarEventParams('');
 
-document?.getElementById('eventDetails')?.addEventListener('input', function () {
+document?.getElementById('eventDetails')?.addEventListener('input', () => {
   const eventDetails = (document.getElementById('eventDetails') as HTMLTextAreaElement)
     ?.value;
   eventParams = makeGoogleCalendarEventParams(eventDetails);
   setPreview(eventParams);
 });
 
-document?.getElementById('generateLink')?.addEventListener('click', function () {
+document?.getElementById('generateLink')?.addEventListener('click', () => {
   const eventUrl = makeGoogleCalendarEventURL(eventParams);
 
   window.open(eventUrl, '_blank');

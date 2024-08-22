@@ -1,7 +1,7 @@
 import { getClipboardHTML } from './lib/clipboard';
 import { makeGoogleCalendarEventURL } from './event/event';
 import { makeGoogleCalendarEventParams } from './event/parser/main';
-import { setPreview } from 'lib/preview';
+import { setPreview } from './lib/preview';
 
 let eventParams = makeGoogleCalendarEventParams('');
 let clipboardHtml: string | undefined;

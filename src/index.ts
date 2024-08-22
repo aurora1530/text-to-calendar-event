@@ -24,6 +24,11 @@ document?.getElementById('eventDetails')?.addEventListener('paste', async () => 
   const useHtml =
     (document.getElementById('useHtml') as HTMLInputElement)?.checked ?? false;
   clipboardHtml = useHtml ? await getClipboardHTML() : undefined;
+
+  // Pasteイベントの処理が終わったら、手動でinputイベントをトリガーする
+  const eventDetailsElement = document.getElementById('eventDetails') as HTMLTextAreaElement;
+  const inputEvent = new Event('input', { bubbles: true });
+  eventDetailsElement.dispatchEvent(inputEvent);
 });
 
 document?.getElementById('eventDetails')?.addEventListener('input', () => {

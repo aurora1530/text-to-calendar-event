@@ -1,8 +1,11 @@
-import { GoogleCalendarEvent } from "../event/event";
+import { GoogleCalendarEvent } from '../event/event';
+import { removeScriptTag } from './html';
 
 export const setPreview = (eventParams: GoogleCalendarEvent) => {
   document.getElementById('previewTitle')!.innerText = eventParams.text;
-  document.getElementById('previewDescription')!.innerText = eventParams.details;
+  document.getElementById('previewDescription')!.innerHTML = removeScriptTag(
+    eventParams.details
+  );
   document.getElementById('previewLocation')!.innerText = eventParams.location ?? '';
 
   if (!eventParams.dates) {

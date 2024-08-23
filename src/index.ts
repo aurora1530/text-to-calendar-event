@@ -2,6 +2,7 @@ import { getClipboardHTML } from './lib/clipboard';
 import { makeGoogleCalendarEventURL } from './event/event';
 import { makeGoogleCalendarEventParams } from './event/parser/main';
 import { setPreview } from './lib/preview';
+import { removeStyleAttribute } from './lib/html';
 
 let eventParams = makeGoogleCalendarEventParams('');
 let clipboardHtml: string | undefined;
@@ -10,6 +11,7 @@ document?.getElementById('eventDetails')?.addEventListener('paste', async () => 
   const useHtml =
     (document.getElementById('useHtml') as HTMLInputElement)?.checked ?? false;
   clipboardHtml = useHtml ? await getClipboardHTML() : undefined;
+  clipboardHtml = clipboardHtml ? removeStyleAttribute(clipboardHtml) : undefined;
 
   // Pasteイベントの処理が終わったら、手動でinputイベントをトリガーする
   const eventDetailsElement = document.getElementById('eventDetails') as HTMLTextAreaElement;

@@ -1,5 +1,12 @@
 export const removeScriptTag = (html: string): string => {
-  return html.replace(/<script.*?<\/script>/gs, '');
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  doc.querySelectorAll('script').forEach((ele) => {
+    ele.remove();
+  });
+
+  return doc.documentElement.innerHTML;
 };
 
 export const removeStyleAttribute = (html: string): string => {

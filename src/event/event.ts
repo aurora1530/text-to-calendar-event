@@ -44,14 +44,12 @@ const dateParamToURLParam = (
 };
 
 export const makeGoogleCalendarEventURL = (event: GoogleCalendarEvent): string => {
-  const params = new URLSearchParams();
-  params.append('text', event.text);
-  params.append('details', event.details);
-  if (event.dates) {
-    params.append('dates', dateParamToURLParam('dates', event.dates));
-  }
-  if (event.location) {
-    params.append('location', event.location);
-  }
-  return `${EVENT_ROOT_URL}&${params.toString()}`;
+  const params = [
+    paramToURLParam('text', event.text),
+    paramToURLParam('details', event.details),
+    dateParamToURLParam('dates', event.dates),
+    event.location ? paramToURLParam('location', event.location) : undefined,
+  ].filter((param) => param !== undefined);
+
+  return `${EVENT_ROOT_URL}&${params.join('&')}`;
 };

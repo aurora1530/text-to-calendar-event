@@ -28,7 +28,10 @@ const findAllYearAndDays = (text: string): Date[] => {
     const year = match.groups?.year
       ? normalizeYear(parseInt(match.groups.year.replace(/[\/年]/g, '')))
       : new Date().getFullYear();
-    const date = match.groups?.date.replace(/\s|月|日/g, '/').replace(/[\/年]/g, '-');
+    const date = match.groups?.date
+      .replace(/\s|月/g, '/')
+      .replace(/[\/年]/g, '-')
+      .replace(/日/g, '');
     return new Date(`${year}-${date}`);
   });
 

@@ -1,4 +1,8 @@
-export const getClipboardHTML = async () => {
+/**
+ * クリップボードにあるhtmlを取得する
+ * 取得できない場合はundefinedを返す
+ */
+export const getClipboardHTML = async (): Promise<string | undefined> => {
   try {
     const clipboardItems = await navigator.clipboard.read();
 

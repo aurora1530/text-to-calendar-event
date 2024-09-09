@@ -1,4 +1,7 @@
-export const removeScriptTag = (html: string): string => {
+/**
+ * htmlテキスト内からscriptタグを全て削除する
+ */
+export const removeAllScriptTags = (html: string): string => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
@@ -9,7 +12,10 @@ export const removeScriptTag = (html: string): string => {
   return doc.documentElement.innerHTML;
 };
 
-export const removeStyleAttribute = (html: string): string => {
+/**
+ * htmlテキスト内からstyle属性を全て削除する
+ */
+export const removeAllStyleAttributes = (html: string): string => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 

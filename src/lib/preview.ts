@@ -1,4 +1,5 @@
 import { GoogleCalendarEvent } from '../event/event';
+import { formatDateToDateAndTime as formatDateToDateAndTimeString } from './date';
 import { removeAllScriptTags } from './html';
 
 /**
@@ -18,7 +19,9 @@ export const setPreview = (eventParams: GoogleCalendarEvent): void => {
   // 終日の場合は日付のみ、それ以外は開始日時と終了日時を表示
   const dateText = eventParams.dates.isAllday
     ? eventParams.dates.start.toLocaleDateString()
-    : `${eventParams.dates.start.toLocaleString()} - ${eventParams.dates.end.toLocaleString()}`;
+    : formatDateToDateAndTimeString(eventParams.dates.start) +
+      ' - ' +
+      formatDateToDateAndTimeString(eventParams.dates.end);
   document.getElementById('previewDate')!.innerText = dateText;
   return;
 };

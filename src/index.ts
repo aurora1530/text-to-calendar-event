@@ -3,6 +3,7 @@ import { makeGoogleCalendarEventURL } from './event/event';
 import { makeGoogleCalendarEventParams } from './event/parser/main';
 import { setPreview } from './lib/preview';
 import { removeAllStyleAttributes } from './lib/html';
+import { debounce } from './utils/debounce';
 
 let eventParams = makeGoogleCalendarEventParams('');
 let clipboardHtml: string | undefined;
@@ -19,16 +20,19 @@ document?.getElementById('eventDetails')?.addEventListener('paste', async () => 
   eventDetailsElement.dispatchEvent(inputEvent);
 });
 
-document?.getElementById('eventDetails')?.addEventListener('input', () => {
-  const inputText = (document.getElementById('eventDetails') as HTMLTextAreaElement)
-    ?.value;
+document?.getElementById('eventDetails')?.addEventListener(
+  'input',
+  debounce(() => {
+    const inputText = (document.getElementById('eventDetails') as HTMLTextAreaElement)
+      ?.value;
 
-  const text = clipboardHtml
-    ? inputText.split('\n')[0] + '\n' + clipboardHtml
-    : inputText;
-  eventParams = makeGoogleCalendarEventParams(text);
-  setPreview(eventParams);
-});
+    const text = clipboardHtml
+      ? inputText.split('\n')[0] + '\n' + clipboardHtml
+      : inputText;
+    eventParams = makeGoogleCalendarEventParams(text);
+    setPreview(eventParams);
+  }, 200)
+);
 
 document?.getElementById('generateLink')?.addEventListener('click', () => {
   const eventUrl = makeGoogleCalendarEventURL(eventParams);

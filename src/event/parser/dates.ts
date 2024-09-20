@@ -87,6 +87,20 @@ export const extractStartAndEndDates = (text: string): EventDates => {
   const times = findAllTimes(text);
 
   if (yearAndDays.length === 0) {
+    // 時刻が２つ以上ある場合はstartとendを設定
+    if (times.length >= 2) {
+      const start = new Date();
+      start.setHours(times[0].hour, times[0].minute);
+      const end = new Date();
+      end.setHours(times[1].hour, times[1].minute);
+
+      return {
+        isAllday: false,
+        start,
+        end,
+      };
+    }
+
     return {
       isAllday: true,
       start: new Date(),

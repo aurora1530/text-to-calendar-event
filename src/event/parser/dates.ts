@@ -18,6 +18,23 @@ const isInvalidDate = (date: Date): boolean => {
   return Number.isNaN(date.getTime());
 };
 
+/**
+ * dateが過去の日付の場合、来年の年数を返す。
+ * それ以外の場合は今年の年数を返す。
+ */
+const calcYearFromDate = (date: Date): number => {
+  const now = new Date();
+  // 月/日だけを比較できるように、年・時・分・秒をnowとdateで共通にする
+  now.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  date.setFullYear(now.getFullYear());
+
+  if (date.getTime() < now.getTime()) {
+    return now.getFullYear() + 1;
+  }
+  return now.getFullYear();
+}
+
 const findAllYearAndDays = (text: string): Date[] => {
   const normalizedText = zenkakuDigitsToHankaku(text).replace(/\s/g, '');
   const dateRegex =
@@ -25,13 +42,13 @@ const findAllYearAndDays = (text: string): Date[] => {
   const matches = Array.from(normalizedText.matchAll(dateRegex));
 
   const dates = matches.map((match) => {
+    const date = match.groups?.date
+    .replace(/\s|月/g, '/')
+    .replace(/[\/年]/g, '-')
+    .replace(/日/g, '');
     const year = match.groups?.year
       ? normalizeYear(parseInt(match.groups.year.replace(/[\/年]/g, '')))
-      : new Date().getFullYear();
-    const date = match.groups?.date
-      .replace(/\s|月/g, '/')
-      .replace(/[\/年]/g, '-')
-      .replace(/日/g, '');
+      : date ? calcYearFromDate(new Date(date)) : new Date().getFullYear();
     return new Date(`${year}-${date}`);
   });
 

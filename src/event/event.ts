@@ -25,7 +25,6 @@ const dateToRFC5545 = (date: Date): string => {
 };
 
 const dateParamToURLParam = (
-  key: string,
   eventDates: EventDates = {
     isAllday: true,
     start: new Date(),
@@ -38,19 +37,19 @@ const dateParamToURLParam = (
     const gmtDiffMinutes = eventDates.start.getTimezoneOffset();
     const date = new Date(eventDates.start.getTime() - gmtDiffMinutes * 60 * 1000);
     const time = dateToRFC5545(date).replace(/T.*$/, '');
-    return paramToURLParam(key, `${time}/${time}`);
+    return paramToURLParam('dates', `${time}/${time}`);
   }
 
   const start = dateToRFC5545(eventDates.start);
   const end = dateToRFC5545(eventDates.end);
-  return paramToURLParam(key, `${start}/${end}`);
+  return paramToURLParam('dates', `${start}/${end}`);
 };
 
 export const makeGoogleCalendarEventURL = (event: GoogleCalendarEvent): string => {
   const params = [
     paramToURLParam('text', event.text),
     paramToURLParam('details', event.details),
-    dateParamToURLParam('dates', event.dates),
+    dateParamToURLParam(event.dates),
     event.location ? paramToURLParam('location', event.location) : undefined,
   ].filter((param) => param !== undefined);
 

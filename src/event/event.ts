@@ -33,8 +33,13 @@ const dateParamToURLParam = (
     start: new Date(),
   }
 ): string => {
-  if(eventDates.isAllday){
-    const time = dateToRFC5545(eventDates.start).replace(/T.*$/, '');
+  if (eventDates.isAllday) {
+    /**
+     * 終日のイベントは`YYYYMMDD/YYYYMMDD`の形式で指定するのだが、dateToRFC5545()で生成される文字列は標準時での日付になってしまう。そのため、GMTの差分を考慮して日付を生成する必要がある。
+     */
+    const gmtDiffMinutes = eventDates.start.getTimezoneOffset();
+    const date = new Date(eventDates.start.getTime() - gmtDiffMinutes * 60 * 1000);
+    const time = dateToRFC5545(date).replace(/T.*$/, '');
     return paramToURLParam(key, `${time}/${time}`);
   }
 

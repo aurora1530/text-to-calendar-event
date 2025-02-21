@@ -1,5 +1,3 @@
-import { EVENT_ROOT_URL } from './constant';
-
 export type EventDates =
   | {
       isAllday: false;
@@ -56,5 +54,5 @@ export const makeGoogleCalendarEventURL = (event: GoogleCalendarEvent): string =
     event.location ? paramToURLParam('location', event.location) : undefined,
   ].filter((param) => param !== undefined);
 
-  return `${EVENT_ROOT_URL}&${params.join('&')}`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&${params.join('&')}`;
 };

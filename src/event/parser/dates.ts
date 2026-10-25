@@ -1,159 +1,100 @@
-import { EventDates } from '../event';
+import type { EventDates } from '../event';
 
-const zenkakuDigitsToHankaku = (text: string): string => {
-  return text.replace(/[０-９]/g, (s) => {
-    return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
-  });
-};
+const normalizeDigits = (text: string): string =>
+  text.replace(/[０-９]/g, (digit) =>
+    String.fromCharCode(digit.charCodeAt(0) - 0xfee0)
+  );
 
-const normalizeYear = (year: number): number => {
-  if (year < 100) {
-    const currentCentury = Math.floor(new Date().getFullYear() / 100) * 100;
-    return year + currentCentury;
-  }
-  return year;
-};
+const normalizeYear = (year: number, now: Date): number =>
+  year < 100 ? Math.floor(now.getFullYear() / 100) * 100 + year : year;
 
-const isInvalidDate = (date: Date): boolean => {
-  return Number.isNaN(date.getTime());
-};
-
-/**
- * dateが過去の日付の場合、来年の年数を返す。
- * それ以外の場合は今年の年数を返す。
- */
-const calcYearFromDate = (date: Date): number => {
-  const now = new Date();
-  // 月/日だけを比較できるように、年・時・分・秒をnowとdateで共通にする
-  now.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  date.setFullYear(now.getFullYear());
-
-  if (date.getTime() < now.getTime()) {
-    return now.getFullYear() + 1;
-  }
-  return now.getFullYear();
-}
-
-const findAllYearAndDays = (text: string): Date[] => {
-  const normalizedText = zenkakuDigitsToHankaku(text).replace(/\s/g, '');
+const findAllYearAndDays = (text: string, now: Date): Date[] => {
+  // 空白は削除せず、日付と直後の時刻の数字が連結されるのを防ぐ。
   const dateRegex =
-    /(?:(?<year>\d{1,4}[\/年])?\s*(?<date>\d{1,2}(?:[\/-]\d{1,2}|\s?[\/月]\s?\d{1,2}日?)))/g;
-  const matches = Array.from(normalizedText.matchAll(dateRegex));
+    /(?<![\d:：])(?:(?<year>\d{1,4})\s*[/年-]\s*)?(?<month>\d{1,2})\s*[/月-]\s*(?<day>\d{1,2})日?(?![\d:：])/g;
+  const dates: Date[] = [];
 
-  const dates = matches.map((match) => {
-    const date = match.groups?.date
-    .replace(/\s|月/g, '/')
-    .replace(/[\/年]/g, '-')
-    .replace(/日/g, '');
-    const year = match.groups?.year
-      ? normalizeYear(parseInt(match.groups.year.replace(/[\/年]/g, '')))
-      : date ? calcYearFromDate(new Date(date)) : new Date().getFullYear();
-    return new Date(`${year}-${date}`);
-  });
+  for (const match of text.matchAll(dateRegex)) {
+    const { year, month, day } = match.groups!;
+    const monthNumber = Number(month);
+    const dayNumber = Number(day);
+    const reference = dates.at(-1) ?? now;
+    let yearNumber = year ? normalizeYear(Number(year), now) : reference.getFullYear();
 
-  return dates.filter((date) => !isInvalidDate(date));
+    if (!year && (monthNumber < reference.getMonth() + 1 ||
+      (monthNumber === reference.getMonth() + 1 && dayNumber < reference.getDate()))) {
+      yearNumber++;
+    }
+
+    // 文字列のDateパースに依存せず、ローカル日付として生成・検証する。
+    const date = new Date(yearNumber, monthNumber - 1, dayNumber);
+    if (date.getFullYear() !== yearNumber || date.getMonth() !== monthNumber - 1 ||
+      date.getDate() !== dayNumber) {
+      throw new RangeError(`存在しない日付です: ${match[0]}`);
+    }
+    dates.push(date);
+  }
+  return dates;
 };
 
-type Time = {
-  hour: number;
-  minute: number;
-};
+type Time = { hour: number; minute: number };
 
 const findAllTimes = (text: string): Time[] => {
-  const timeRegex = /(?<hour>\d{1,2})[:：時](?<minute>\d{2})?(?!間)/g;
-  const matches = Array.from(text.matchAll(timeRegex));
-
-  const times = matches.map((match) => {
-    return {
-      hour: parseInt(match.groups?.hour ?? '0'),
-      minute: parseInt(match.groups?.minute ?? '0'),
-    };
+  const timeRegex =
+    /(?<!\d)(?<hour>\d{1,2})(?:[:：](?<colonMinute>\d{1,2})(?!\d)|時(?!間)(?:(?<minute>\d{1,2})分?)?)(?!\d)/g;
+  return Array.from(text.matchAll(timeRegex), (match) => {
+    const hour = Number(match.groups!.hour);
+    const minute = Number(match.groups!.colonMinute ?? match.groups!.minute ?? 0);
+    if (hour > 23 || minute > 59) {
+      throw new RangeError(`不正な時刻です: ${match[0]}`);
+    }
+    return { hour, minute };
   });
-
-  return times;
 };
 
 const findTimeRange = (text: string): Time | undefined => {
-  const timeRegex = /(?<hour>\d{1,2})時間(?<minute>(半|\d{1,2}分))?/;
-  const match = text.match(timeRegex);
-
-  if (!match || !match.groups?.hour) {
-    return;
-  }
-
-  const hour = parseInt(match.groups.hour);
-  const minute =
-    match.groups?.minute === '半' ? 30 : parseInt(match.groups?.minute ?? '0');
-  return { hour, minute };
-};
-
-const addTime = (x: Time, y: Time): Time => {
+  const match = text.match(/(?<!\d)(?<hour>\d{1,2})時間(?<minute>半|\d{1,2}分)?/);
+  if (!match) return;
   return {
-    hour: x.hour + y.hour,
-    minute: x.minute + y.minute,
+    hour: Number(match.groups!.hour),
+    minute: match.groups!.minute === '半' ? 30 : parseInt(match.groups!.minute ?? '0'),
   };
 };
 
 const setTimeToDate = (date: Date, time: Time): Date => {
-  return new Date(date.setHours(time.hour, time.minute));
+  const result = new Date(date);
+  result.setHours(time.hour, time.minute, 0, 0);
+  return result;
 };
 
 export const extractStartAndEndDates = (text: string): EventDates => {
-  const yearAndDays = findAllYearAndDays(text);
-  const times = findAllTimes(text);
-
-  if (yearAndDays.length === 0) {
-    // 時刻が２つ以上ある場合はstartとendを設定
-    if (times.length >= 2) {
-      const start = new Date();
-      start.setHours(times[0].hour, times[0].minute);
-      const end = new Date();
-      end.setHours(times[1].hour, times[1].minute);
-
-      return {
-        isAllday: false,
-        start,
-        end,
-      };
-    }
-
-    return {
-      isAllday: true,
-      start: new Date(),
-    };
-  }
+  const normalizedText = normalizeDigits(text);
+  const now = new Date();
+  const dates = findAllYearAndDays(normalizedText, now);
+  const times = findAllTimes(normalizedText);
+  const startDate = dates[0] ?? now;
 
   if (times.length === 0) {
-    return {
-      isAllday: true,
-      start: yearAndDays[0],
-    };
+    return { isAllday: true, start: startDate };
   }
 
-  // startの日付に時刻を設定
-  const start = setTimeToDate(yearAndDays[0], times[0]);
+  const start = setTimeToDate(startDate, times[0]);
+  const duration = findTimeRange(normalizedText);
+  let end: Date;
+  if (duration || times.length === 1) {
+    const { hour, minute } = duration ?? { hour: 1, minute: 0 };
+    end = new Date(start);
+    end.setMinutes(end.getMinutes() + hour * 60 + minute);
+  } else {
+    end = setTimeToDate(dates[1] ?? startDate, times[1]);
+    // 終了日が省略されたときだけ、早い終了時刻を翌日として扱う。
+    if (dates.length < 2 && end.getTime() < start.getTime()) {
+      end.setDate(end.getDate() + 1);
+    }
+    if (end.getTime() < start.getTime()) {
+      throw new RangeError('終了日時は開始日時以降にしてください。');
+    }
+  }
 
-  // endの日付を指定。時刻が複数ある場合は２つ目を、ない場合は１つ目（startと同じ）を使う。
-  // ただし、２つ目の日付が１つ目より前の場合は１つ目を使う。
-  const endTargetDate =
-    yearAndDays.length > 1 && yearAndDays[1].getTime() > yearAndDays[0].getTime()
-      ? yearAndDays[1]
-      : yearAndDays[0];
-
-  // 所要時間が指定されている場合は、startの時刻に所要時間を加算してendの時刻を設定
-  // 指定されていない場合は、２つ目の時刻またはstartの時刻に１時間を加算してendの時刻を設定
-  const timeRange = findTimeRange(text);
-  const endTargetTime = timeRange
-    ? addTime(times[0], timeRange)
-    : times.length > 1
-    ? times[1]
-    : addTime(times[0], { hour: 1, minute: 0 });
-  const end = setTimeToDate(endTargetDate, endTargetTime);
-
-  return {
-    isAllday: false,
-    start,
-    end,
-  };
+  return { isAllday: false, start, end };
 };

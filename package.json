@@ -13,6 +13,7 @@
     "typescript": "^5.5.4"
   },
   "scripts": {
+    "test": "node --import tsx --test tests/*.test.ts",
   "build": "esbuild src/index.ts --bundle --outfile=docs/bundle.js --format=iife --platform=browser --sourcemap=inline --minify --loader:.ts=ts --tsconfig=tsconfig.json",
     "dev": "npm run build && start docs/index.html"
   }
